@@ -2,25 +2,28 @@ from zmqRemoteApi import RemoteAPIClient
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Connect to CoppeliaSim
 client = RemoteAPIClient('127.0.0.1', 23000)
 sim = client.getObject('sim')
-
-# MANUALLY specify script type as integer
-script_type = 1  # sim.scripttype_childscript
 
 # Call Lua function
 success, points = sim.callScriptFunction(
     'getLaserPointsForPython@Pioneer_p3dx', 
-    1,  # child script type
+    sim.scripttype_childscript, 
     []
 )
 
-if success and points:
+if success and points and len(points) > 0:
     points = np.array(points).reshape(-1, 3)
-    plt.scatter(points[:, 0], points[:, 1], s=2, c='red')
-    plt.title("LIDAR Scan from fastHokuyo")
+    x = points[:, 0]
+    y = points[:, 1]
+
+    plt.figure(figsize=(8, 8))
+    plt.scatter(x, y, s=2, c='red')
+    plt.title("🔥 LIDAR Scan from fastHokuyo (Pioneer)")
     plt.axis('equal')
     plt.grid(True)
     plt.show()
+
 else:
-    print("Failed to get laser data or no points returned.")
+    print("💥 Failed to get laser data or no points returned.")
